@@ -271,8 +271,18 @@ def predict_clr(random_data=False, save_to_db=False):
 
             # for each grant, list the contributions in key value pairs like {'profile id': sum of contributions}
             grant_id = grant.defer_clr_to.pk if grant.defer_clr_to else grant.id
-            contrib_data.append({'id': grant_id, 'contributions': all_summed_contributions})
+            new_contrib_data = {'id': grant_id, 'contributions': all_summed_contributions}
 
+            # add to existing array
+            does_exist_in_array_already = any([ele['id'] for ele in contrib_data if ele['id'] == grant_id])
+            if not does_exist_in_array_already:
+                # append
+                contrib_data.append(new_contrib_data)
+            else:
+                # combine
+                for i in range(0, len(contrib_data)):
+                    if contrib_data[i]['id'] == grant_id:
+                        contrib_data[i]['contributions'] = contrib_data[i]['contributions'] + new_contrib_data['contributions']
     else:
         # use random contribution data for testing
         contrib_data = generate_random_contribution_data()
